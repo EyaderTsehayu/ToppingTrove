@@ -4,19 +4,17 @@ import { useState, useEffect } from "react";
 import { RiMenu3Line, RiCloseLine } from "react-icons/ri";
 import logo from "/public/images/logo.png";
 
-//import "../styles/annimations.css";
-
 const Menu = () => (
   <>
     {" "}
     <p className=" hover:text-primary">
-      <a href="#Breakfast">Home</a>
+      <a href="/">Home</a>
     </p>
     <p className=" hover:text-primary">
-      <a href="#Lunch">Orders</a>
+      <a href="/order">Orders</a>
     </p>
     <p className=" hover:text-primary">
-      <a href="#Dinner">Who we are</a>
+      <a href="/">Who we are</a>
     </p>
   </>
 );
