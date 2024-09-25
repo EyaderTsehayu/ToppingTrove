@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Hero = () => {
   return (
-    <div>
+    <div className="overflow-hidden">
       <div>
         <div className="flex md:flex-row">
           <div className="lg:max-w-[766px] md:max-w-[450px] max-w-[280px] lg:pl-28 px-4 lg:px-0">
@@ -23,33 +23,31 @@ const Hero = () => {
               <input
                 type="text"
                 placeholder="Search"
-                className="flex-1 p-1 h-12 md:h-14 lg:h-16 lg:pl-8 pl-2 lg:text-xl placeholder-black rounded-full text-gray-900 outline-none"
+                className="flex-1 p-1 h-12 md:h-14 lg:h-16 lg:pl-8 lg:text-xl placeholder-black rounded-full text-gray-900 outline-none"
               />
               <button className="flex justify-center items-center p-2 bg-orange-400 h-12 md:h-14 lg:h-16 w-12 md:w-14 lg:w-16 m-1 rounded-full text-gray-700">
                 <Image src={searchIcon} alt="search" width={25} height={25} />
               </button>
             </div>
           </div>
-          <div className="relative w-full  h-72 md:h-auto flex justify-end">
-            <div className="relative  w-[180px] h-[350px]  md:w-[200px] md:h-[380px] lg:w-[320px] lg:h-[650px]">
+          <div className="relative w-full  md:h-auto flex justify-end">
+            <div className="relative w-[180px] h-[350px] md:w-[200px] md:h-[380px] lg:w-[320px] lg:h-[650px]">
               <Image
                 src={heroleaf1}
                 alt="Leaf-1 hero"
-                className="absolute md:w-40 md:h-40 h-24 w-24 lg:right-52 right-28 object-cover "
+                className="absolute md:w-40 md:h-40 h-24 w-24 lg:right-52 right-28 object-cover"
               />
-
               <Image
                 src={heropizza}
                 alt="pizza hero"
                 objectFit="cover"
                 fill
-                className="w-full z-10 h-full top-0 right-0 object-cover "
+                className="w-full z-10 h-full top-0 right-0 object-cover"
               />
-
               <Image
                 src={heroleaf2}
                 alt="Leaf-2 hero"
-                className="absolute z-0 lg:w-40 lg:h-40 h-20 w-20 lg:top-96 top-56 lg:right-60 right-32 object-cover "
+                className="absolute z-0 lg:w-40 lg:h-40 h-20 w-20 lg:top-96 top-56 lg:right-60 right-32 object-cover"
               />
             </div>
           </div>
