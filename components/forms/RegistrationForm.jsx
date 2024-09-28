@@ -5,6 +5,7 @@ import { z } from "zod";
 import CustomInput from "../ui/CustomInput";
 import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Zod schema for validation
 const registrationSchema = z
@@ -31,6 +32,7 @@ const registrationSchema = z
   });
 
 const RegistrationForm = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -39,8 +41,26 @@ const RegistrationForm = () => {
     resolver: zodResolver(registrationSchema),
   });
 
-  const onSubmit = (data) => {
-    console.log("Form Submitted:", data);
+  const onSubmit = async (data) => {
+    const response = await fetch("/api/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+        location: data.location,
+        phoneNumber: data.phoneNumber,
+      }),
+    });
+
+    if (response.ok) {
+      router.push("/sign-in");
+    } else {
+      console.log("Registration Failed");
+    }
+
     // Handle form submission logic here
   };
 
