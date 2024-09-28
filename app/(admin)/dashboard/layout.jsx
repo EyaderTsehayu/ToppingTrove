@@ -14,7 +14,9 @@ const Layout = ({ children }) => {
           {" "}
           <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <main>
-            <div className="mx-auto max-w-screen-2xl   ">{children}</div>
+            <div className="mx-auto max-w-screen-2xl h-screen bg-[#f8f8f8]">
+              {children}
+            </div>
           </main>
         </div>
       </div>
