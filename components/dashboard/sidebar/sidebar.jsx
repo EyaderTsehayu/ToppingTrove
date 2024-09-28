@@ -20,10 +20,11 @@ import { MdOutlineLogin } from "react-icons/md";
 import { PiUserCircle } from "react-icons/pi";
 import { HiOutlineUser } from "react-icons/hi";
 import pizzasidebar from "/public/images/pizzalogin.png";
+import { signOut, useSession } from "next-auth/react";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
-
+  const { data: session } = useSession();
   const trigger = useRef(null);
   const sidebar = useRef(null);
 
@@ -195,7 +196,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         )}
         <Divider sx={{ mb: "4px" }} />
 
-        <button className="flex gap-2 my-4 px-8 text-xl font-semibold text-orange-600">
+        <button
+          onClick={() =>
+            signOut({
+              redirect: true,
+              callbackUrl: `${window.location.origin}/sign-in`,
+            })
+          }
+          className="flex gap-2 my-4 px-8 text-lg font-semibold text-orange-600"
+        >
           <MdOutlineLogin
             style={{
               fontSize: "26px",
@@ -257,12 +266,12 @@ const styledActiveButton = {
   height: "46px",
   //isSidebarOpen ?
   padding: "10px 16px 10px 24px", // : "15px",
-  background: "#EDE7F6",
+  background: "#ff810066",
   borderRadius: 2,
   marginBottom: "3px",
   color: "#5e35b1",
   "&:hover": {
-    background: "#EDE7F6",
+    background: "#ff810066",
     borderRadius: 2,
     color: "#5e35b1",
   },
