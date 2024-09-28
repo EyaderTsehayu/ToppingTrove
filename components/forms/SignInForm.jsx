@@ -5,6 +5,8 @@ import { z } from "zod";
 import CustomInput from "../ui/CustomInput";
 import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 // Zod schema for validation
 const signInSchema = z.object({
@@ -15,6 +17,7 @@ const signInSchema = z.object({
 });
 
 const SignInForm = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -23,9 +26,17 @@ const SignInForm = () => {
     resolver: zodResolver(signInSchema),
   });
 
-  const onSubmit = (data) => {
-    console.log("Form Submitted:", data);
-    // Handle form submission logic
+  const onSubmit = async (data) => {
+    const signInData = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+    if (signInData?.error) {
+      console.error(signInData.error);
+    } else {
+      router.push("/dashboard/");
+    }
   };
 
   return (
