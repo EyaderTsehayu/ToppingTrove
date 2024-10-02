@@ -1,66 +1,45 @@
+"use client";
 import pizzaorder from "/public/images/pizzaorder.png";
 import resprofile from "/public/images/resprofile.png";
 import OrderCard from "../card/OrderCard";
+import { useEffect, useState } from "react";
+import Loading from "@/app/(admin)/dashboard/loading";
 
 const PopularPizza = () => {
-  const pizzaData = [
-    {
-      id: 1,
-      name: "Margherita",
-      ingredients: "Tomato, Mozzarella, Bell Peppers, Onions, Olives",
-      price: 150,
-      image: pizzaorder,
-      restaurant: "Azmera Pizza",
-      restaurantImage: resprofile,
-    },
-    {
-      id: 2,
-      name: "Margherita",
-      ingredients: "Tomato, Mozzarella, Bell Peppers, Onions, Olives",
-      price: 150,
-      image: pizzaorder,
-      restaurant: "Azmera Pizza",
-      restaurantImage: resprofile,
-    },
-    {
-      id: 3,
-      name: "Margherita",
-      ingredients: "Tomato, Mozzarella, Bell Peppers, Onions, Olives",
-      price: 150,
-      image: pizzaorder,
-      restaurant: "Azmera Pizza",
-      restaurantImage: resprofile,
-    },
-    {
-      id: 4,
-      name: "Margherita",
-      ingredients: "Tomato, Mozzarella, Bell Peppers, Onions, Olives",
-      price: 150,
-      image: pizzaorder,
-      restaurant: "Azmera Pizza",
-      restaurantImage: resprofile,
-    },
-    {
-      id: 5,
-      name: "Margherita",
-      ingredients: "Tomato, Mozzarella, Bell Peppers, Onions, Olives",
-      price: 150,
-      image: pizzaorder,
-      restaurant: "Azmera Pizza",
-      restaurantImage: resprofile,
-    },
-    {
-      id: 6,
-      name: "Margherita",
-      ingredients: "Tomato, Mozzarella, Bell Peppers, Onions, Olives",
-      price: 150,
-      image: pizzaorder,
-      restaurant: "Azmera Pizza",
-      restaurantImage: resprofile,
-    },
-    // Add more pizza data objects here if needed
-  ];
+  const [pizzaData, setPizzaData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch data from the backend
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        const response = await fetch("/api/menu");
+        if (!response.ok) {
+          throw new Error("Failed to fetch menu data");
+        }
+
+        const data = await response.json();
+        const formattedData = data.map((pizza) => ({
+          ...pizza,
+          photo: pizza.photo,
+          toppings: pizza.toppings.join(", "),
+          // logo: pizza.logo,
+        }));
+        console.log("formatted data in the home", formattedData);
+        setPizzaData(formattedData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching pizza data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchMenus();
+  }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <div className="bg-mainbg md:px-28 px-4">
       <h2 className="mb-4 text-2xl font-semibold text-sectiontitles items-center">
