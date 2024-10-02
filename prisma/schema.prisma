@@ -18,30 +18,92 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OrderStatus {
+  PREPARING
+  READY
+  DELIVERED
+}
+  model User {
+    id           Int          @id @default(autoincrement())
+    name         String?
+    email        String       @unique
+    password     String
+    location    String
 
-// model User {
-//   id          Int        @id @default(autoincrement())
- 
-//   email       String     @unique
-//   password    String
-//   phoneNumber String
-//   location    String
-//   adminName    String?
-//   // role        UserRole
-// restaurantsName String?
+    phoneNumber  String?
 
-//   createdAt   DateTime   @default(now())
-//  // orders       Order[]
+    // Foreign key linking to the Restaurant
+    restaurant   Restaurant?  @relation(fields: [restaurantId], references: [id])
+    restaurantId Int?
+    orders    Order[]  @relation("UserOrders")
+  
+    // Roles assigned to this user
+    roles     Role[]   @relation("UserRoles")
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+  }
 
-// }
+model Restaurant {
+  id          Int       @id @default(autoincrement())
+  name        String
+  password    String
+  adminName    String?
+  email       String?
+  phoneNumber String
+  location    String
+  logo        Bytes    // Store as a URL or file path
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  password String
-  location    String?
-phoneNumber String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  users       User[]    @relation
+  menus       Menu[]    @relation
+  orders      Order[]    @relation("RestaurantOrders")
+  roles      Role[]      @relation("RestaurantRoles")
 
+}
+
+model Menu {
+  id          Int       @id @default(autoincrement())
+  name        String
+  toppings    String[]    
+  price       String?
+  photo        String?  
+  restaurant   Restaurant?  @relation(fields: [restaurantId], references: [id])
+  restaurantId Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orders      Order[]      @relation("MenuOrders")
+}
+
+model Order {
+  id         Int          @id @default(autoincrement())
+  menu       Menu         @relation("MenuOrders", fields: [menuId], references: [id])
+  menuId     Int
+  toppings   String[]
+  quantity   Int          
+  user       User         @relation("UserOrders", fields: [userId], references: [id])
+  userId     Int
+  restaurant       Restaurant   @relation("RestaurantOrders", fields: [restaurantId], references: [id])
+  restaurantId     Int
+
+  status     OrderStatus  @default(PREPARING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  permissions Permission[] @relation("RolePermissions")
+  users       User[]       @relation("UserRoles")
+  restaurant       Restaurant   @relation("RestaurantRoles", fields: [restaurantId], references: [id])
+  restaurantId     Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  roles Role[]  @relation("RolePermissions")
 }
