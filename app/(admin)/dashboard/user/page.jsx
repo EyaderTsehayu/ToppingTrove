@@ -32,6 +32,8 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import succes from "/public/images/succes.png";
 import Image from "next/image";
+import { defineAbilitiesFor } from "@/lib/ability";
+import { useRouter } from "next/navigation";
 
 // Zod schema for validation
 const registrationSchema = z.object({
@@ -57,6 +59,22 @@ const Page = () => {
 
   const { data: session, status } = useSession();
   const loginResId = session?.user.restaurantId;
+
+  const ability = defineAbilitiesFor(session?.user);
+
+  const router = useRouter();
+
+  // Check for permissions on page load
+  useEffect(() => {
+    if (
+      !ability.can("manage", "all") &&
+      !ability.can("create", "User") &&
+      !ability.can("read", "Customer")
+    ) {
+      router.replace("/not-permitted");
+    }
+  }, [ability, router]);
+
   // const router = useRouter();
   const {
     register,
@@ -229,6 +247,7 @@ const Page = () => {
         className="text-base font-normal capitalize py-1.5 px-3 text-white bg-primary"
         onClick={() => setOpenAddDialog(true)}
         size="small"
+        disabled={!ability.can("create", "User")}
       >
         Add User
       </Button>

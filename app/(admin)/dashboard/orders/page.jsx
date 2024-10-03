@@ -26,12 +26,31 @@ import {
 import { Visibility } from "@mui/icons-material";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { FaCheck } from "react-icons/fa";
+import { defineAbilitiesFor } from "@/lib/ability";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const OrdersPage = () => {
   const [orderLists, setOrderLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const { data: session, status } = useSession();
+
+  const ability = defineAbilitiesFor(session?.user);
+
+  const router = useRouter();
+
+  // Check for permissions on page load
+  useEffect(() => {
+    if (
+      !ability.can("manage", "all") &&
+      !ability.can("read", "Order") &&
+      !ability.can("update", "Order")
+    ) {
+      router.replace("/not-permitted");
+    }
+  }, [ability, router]);
 
   // Fetch data from the backend
   useEffect(() => {
@@ -216,24 +235,25 @@ const OrdersPage = () => {
               <Select
                 value={currentStatus}
                 displayEmpty
+                disabled={!ability.can("update", "Order")}
                 sx={{
+                  padding: "0",
                   backgroundColor: bgColor,
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "transparent", // Remove the border when focused
+                  border: "none",
+
+                  ".MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                    //  borderColor: "none", // Remove the border when focused
                   },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "transparent", // Optional: Remove hover border if needed
-                  },
+
                   svg: { color: "white" },
                 }}
-                className="rounded-lg"
+                size="small"
+                className="rounded-xl capitalize "
                 renderValue={() => (
-                  <Typography
-                    sx={{ textTransform: "capitalize", color: "white" }}
-                    className="text-sm"
-                  >
+                  <p className="text-xsm  text-white capitalize ">
                     {currentStatus}
-                  </Typography>
+                  </p>
                 )}
               >
                 <MenuItem>
@@ -385,159 +405,3 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
-
-// "use client";
-// import { useEffect, useMemo, useState } from "react";
-// import {
-//   MaterialReactTable,
-//   useMaterialReactTable,
-// } from "material-react-table";
-// import { Box } from "@mui/material";
-
-// //nested data is ok, see accessorKeys in ColumnDef below
-// const data = [
-//   {
-//     photo:
-//       "https://res.cloudinary.com/dqavpwzbn/image/upload/v1727733442/menu_photos/nmzhcdqougzhysxakput.png",
-//     name: "Cornell1",
-//     toppings: "Tomato",
-//     phoneNumber: "1-234-567-8901",
-//     quanitity: 1,
-//     status: "PREPARING",
-//     createdAt: "2024-10-01T10:15:20.492Z",
-//   },
-//   {
-//     photo:
-//       "https://res.cloudinary.com/dqavpwzbn/image/upload/v1727733442/menu_photos/nmzhcdqougzhysxakput.png",
-//     name: "Cornell2",
-//     toppings: "Tomato",
-//     phoneNumber: "1-234-567-8901",
-//     quanitity: 1,
-//     status: "PREPARING",
-//     createdAt: "2024-10-01T10:15:20.492Z",
-//   },
-//   {
-//     photo:
-//       "https://res.cloudinary.com/dqavpwzbn/image/upload/v1727733442/menu_photos/nmzhcdqougzhysxakput.png",
-//     name: "Cornell3",
-//     toppings: "Tomato, Onion",
-//     phoneNumber: "1-234-567-8901",
-//     quanitity: 1,
-//     status: "PREPARING",
-//     createdAt: "2024-10-01T10:15:20.492Z",
-//   },
-//   {
-//     photo:
-//       "https://res.cloudinary.com/dqavpwzbn/image/upload/v1727733442/menu_photos/nmzhcdqougzhysxakput.png",
-//     name: "Cornell4",
-//     toppings: "Tomato, Egg",
-//     phoneNumber: "1-234-567-8901",
-//     quanitity: 1,
-//     status: "PREPARING",
-//     createdAt: "2024-10-01T10:15:20.492Z",
-//   },
-// ];
-
-// const OrdersPage = () => {
-//   const [orderLists, setOrderLists] = useState([]);
-
-//   // Fetch data from the backend
-//   useEffect(() => {
-//     const fetchMenus = async () => {
-//       try {
-//         const response = await fetch("/api/order");
-//         if (!response.ok) {
-//           throw new Error("Failed to fetch menu data");
-//         }
-
-//         const data = await response.json();
-//         const formattedData = data.map((order) => ({
-//           //  ...order,
-//           name: order.name,
-//           toppings: order.toppings.join(", "),
-//           quanitity: order.quantity,
-//           photo: order.photo,
-//           createdAt: order.createdAt,
-//           status: order.status,
-//           createdAt: order.createdAt,
-//         }));
-//         console.log("formatted data in the order", formattedData);
-//         // setOrderLists(formattedData);
-//         // setLoading(false);
-//       } catch (error) {
-//         console.error("Error fetching pizza data:", error);
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchMenus();
-//   }, []);
-//   //should be memoized or stable
-//   const columns = useMemo(
-//     () => [
-//       {
-//         accessorKey: "name", //access nested data with dot notation
-//         header: "Name",
-//         size: 150,
-//       },
-//       {
-//         accessorKey: "toppings",
-//         header: "Toppings",
-//         size: 150,
-//       },
-
-//       {
-//         accessorKey: "phoneNumber", //normal accessorKey
-//         header: "Customer No",
-//         size: 200,
-//       },
-
-//       {
-//         accessorKey: "createdAt",
-//         header: "Created At",
-//         size: 150,
-//       },
-//       {
-//         accessorKey: "status",
-//         header: "Status",
-//         size: 150,
-//       },
-
-//     ],
-//     []
-//   );
-
-//   const table = useMaterialReactTable({
-//     columns,
-//     data, //data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
-//     enableColumnActions: false,
-//     enableSorting: false,
-//     enablePagination: false,
-//     enableTableFooter: false,
-//     enableStickyFooter: false,
-//     enableBottomToolbar: false,
-//     enableColumnFilterModes: true,
-//     manualFiltering: true,
-//     muiTableContainerProps: { sx: { border: 1, borderColor: "#e0e0e0" } },
-//     muiTablePaperProps: { sx: { p: 2 } },
-//     renderTopToolbarCustomActions: ({ table }) => (
-//       <Box sx={{ display: "flex", gap: "1rem", p: "4px" }}>
-//         <h1 className="text-lg font-normal text-gray-500">Orders</h1>
-//       </Box>
-//     ),
-
-//     muiTableHeadCellProps: (table) => ({
-//       sx: {
-//         backgroundColor: "#f6f6f6",
-//       },
-//     }),
-//   });
-
-//   return (
-//     <div className="m-8">
-//       <MaterialReactTable table={table} />
-//     </div>
-//   );
-// };
-
-// export default OrdersPage;

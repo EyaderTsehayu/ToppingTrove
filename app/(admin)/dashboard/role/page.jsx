@@ -18,11 +18,27 @@ import {
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useSession } from "next-auth/react";
+import { defineAbilitiesFor } from "@/lib/ability";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const [roleLists, setRoleLists] = useState([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const { data: session, status } = useSession();
+
+  const ability = defineAbilitiesFor(session?.user);
+
+  const router = useRouter();
+
+  // Check for permissions on page load
+  useEffect(() => {
+    if (!ability.can("manage", "all") && !ability.can("create", "Role")) {
+      router.replace("/not-permitted");
+    }
+  }, [ability, router]);
+  // console.log("session data", sessiondata);
   const [permissions] = useState([
     "Update Order Status",
     "See Customers",

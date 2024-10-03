@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Checkbox,
@@ -16,6 +16,8 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { LuUpload } from "react-icons/lu";
 import { useSession } from "next-auth/react";
+import { defineAbilitiesFor } from "@/lib/ability";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   pizzaName: z.string().min(1, "Pizza name is required"),
@@ -37,6 +39,16 @@ const Page = () => {
   // console.log("Session inside add menu", restaurantId);
   const [availableToppings, setAvailableToppings] = useState(initialToppings);
   const [image, setImage] = useState();
+  const ability = defineAbilitiesFor(session?.user);
+  const router = useRouter();
+
+  // Check for permissions on page load
+  useEffect(() => {
+    if (!ability.can("manage", "all") && !ability.can("create", "Menu")) {
+      router.replace("/not-permitted");
+    }
+  }, [ability, router]);
+
   const {
     register,
     control,
@@ -51,6 +63,10 @@ const Page = () => {
       price: "",
     },
   });
+
+  // if (!ability.can("create", "Menu")) {
+  //   return <div>You do not have permission to create menu</div>;
+  // }
 
   // const convertFileToBase64 = (file) => {
   //   return new Promise((resolve, reject) => {
