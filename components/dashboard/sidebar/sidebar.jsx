@@ -142,9 +142,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       ref={sidebar}
       className={`fixed top-0 left-0 z-10 h-full  xl:w-2/12  w-64 overflow-y-auto bg-white drop-shadow-lg duration-300 ease-linear lg:static lg:translate-x-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } ${
-        pathname == "/user" || pathname.includes("/user") ? "lg:hidden " : ""
-      }`}
+      } `}
     >
       <SideBarTitle sx={styledSidebarTitle}>
         <Typography
