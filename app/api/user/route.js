@@ -1,12 +1,21 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { hash } from "bcrypt";
+import { connect } from "mongoose";
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { email, password, location, phoneNumber, restaurantId } = body;
-
+    const {
+      name,
+      email,
+      password,
+      location,
+      phoneNumber,
+      restaurantId,
+      roles,
+    } = body;
+    const resId = parseInt(restaurantId);
     const existingUserByEmail = await db.user.findUnique({
       where: {
         email: email,
@@ -26,11 +35,21 @@ export async function POST(req) {
 
     const newUser = await db.user.create({
       data: {
+        name,
         email,
         password: hashPassword,
         location,
         phoneNumber,
-        restaurantId,
+        // restaurantId: resId,
+        roles: {
+          connect: { id: roles },
+        },
+        restaurant: {
+          connect: { id: resId },
+        },
+        // include: {
+        //   roles: true, // Include roles in the response if needed
+        // },
       },
     });
 
@@ -40,6 +59,7 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
+    console.error("Error creating new role:", error);
     return NextResponse.json(
       { message: "Something went wrong" },
       { status: 500 }
