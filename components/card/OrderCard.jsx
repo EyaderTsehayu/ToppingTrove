@@ -16,9 +16,10 @@ const OrderCard = ({ pizza }) => {
       price: pizza.price,
       photo: pizza.photo,
       restaurantId: pizza.restaurantId,
+      restaurantImage: pizza.restaurantImage,
     }).toString(); // Create a query string
 
-    router.push(`/order?${searchParams}`); // Navigate to order page with search params
+    router.push(`/order/new?${searchParams}`); // Navigate to order page with search params
   };
   return (
     <div
@@ -33,8 +34,8 @@ const OrderCard = ({ pizza }) => {
           <h2 className="text-2xl font-bold text-black">{pizza.name}</h2>
           <p className="text-slate-700">{pizza.toppings}</p>
         </div>
-        <div className="flex text-left gap-4">
-          <h1 className="text-3xl font-bold">
+        <div className="flex justify-between items-center text-left gap-4">
+          <h1 className="md:text-3xl  font-bold">
             {pizza.price}{" "}
             <span className="align-super text-sm font-semibold">birr</span>
           </h1>
