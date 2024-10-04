@@ -33,6 +33,7 @@ export async function GET(req) {
       photo: order.menu.photo,
       status: order.status,
       createdAt: order.createdAt,
+      phoneNumber: order.phoneNumber,
       //  logo: `/${menu.restaurant.logo}`,
     }));
 
