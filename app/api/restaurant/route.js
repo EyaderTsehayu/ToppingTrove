@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { hash } from "bcrypt";
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req) {
   try {
@@ -18,8 +19,17 @@ export async function POST(req) {
     // Hash the restaurant password
     const hashedPassword = await hash(password, 10);
 
-    // Convert the logo from Base64 to a Buffer
-    const logoBuffer = Buffer.from(logo, "base64");
+    let photoUrl = null;
+
+    if (logo) {
+      // Upload the image to Cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(logo, {
+        folder: "menu_photos", // Optional: specify a folder in Cloudinary
+        // You can add more options here if needed
+      });
+
+      photoUrl = uploadResponse.secure_url;
+    }
 
     // Create the new restaurant
     const newRestaurant = await db.restaurant.create({
@@ -30,7 +40,7 @@ export async function POST(req) {
         password: hashedPassword,
         location,
         phoneNumber,
-        logo: logoBuffer, // Save logo as bytes
+        logo: photoUrl, //
       },
     });
 
@@ -40,6 +50,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         restaurantId: newRestaurant.id,
+        adminName: newRestaurant.adminName,
         message: "Restaurant created successfully",
       },
       { status: 201 }
