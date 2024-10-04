@@ -6,6 +6,7 @@ import CustomInput from "../ui/CustomInput";
 import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 // Zod schema for validation
 const registrationSchema = z
@@ -42,7 +43,7 @@ const RegistrationForm = () => {
   });
 
   const onSubmit = async (data) => {
-    const response = await fetch("/api/user", {
+    const response = await fetch("/api/user/normalUser", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,8 +58,10 @@ const RegistrationForm = () => {
 
     if (response.ok) {
       router.push("/sign-in");
+      toast.success("Registration Successful");
     } else {
       console.log("Registration Failed");
+      toast.error("Registration Failed");
     }
 
     // Handle form submission logic here
@@ -119,10 +122,16 @@ const RegistrationForm = () => {
       >
         Sign Up
       </Button>
-      <div className="text-center mt-4">
-        <span>Already have an account? </span>
-        <Link href="/sign-in" className="text-primary">
-          Login
+      <div className="flex justify-between text-center mt-4">
+        <div>
+          <span>Already have an account? </span>
+          <Link href="/sign-in" className="text-primary">
+            Login
+          </Link>
+        </div>
+
+        <Link href="/register" className="text-primary">
+          Register Restaurants{" "}
         </Link>
       </div>
     </form>

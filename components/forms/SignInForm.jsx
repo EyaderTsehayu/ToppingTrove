@@ -6,7 +6,8 @@ import CustomInput from "../ui/CustomInput";
 import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
+import { toast } from "react-toastify";
 
 // Zod schema for validation
 const signInSchema = z.object({
@@ -27,16 +28,56 @@ const SignInForm = () => {
   });
 
   const onSubmit = async (data) => {
-    const signInData = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    });
-    if (signInData?.error) {
-      console.error(signInData.error);
-    } else {
-      router.push("/dashboard/");
+    const session = await getSession(); // Get the updated session after sign-in
+    const userEmail = data.email;
+    // fetch the status of user
+    let role;
+    try {
+      const url = "/api/user/signin-user"; // Base URL
+      const fullUrl = `${url}?email=${encodeURIComponent(userEmail)}`; // Full URL with query param
+      const response = await fetch(fullUrl); // Fetch request
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const fetchedData = await response.json();
+      console.log("fetchedData", fetchedData);
+
+      role = fetchedData.roles[0].name;
+      console.log(role);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
+
+    try {
+      const signInData = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+      if (signInData?.error) {
+        throw new Error(signInData.error);
+        toast.error("Login Failed");
+      }
+      if (role != null) {
+        router.replace("/dashboard/orders");
+        toast.success("Login Successful!");
+      } else {
+        router.replace("/order");
+        toast.success("Login Successful!");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Login Failed");
+    }
+
+    // if (signInData?.error) {
+    //   console.error(signInData.error);
+    // } else {
+    //   const fetchedData = await response.json("/api/user/");
+    //   router.push("/dashboard/orders");
+    // }
   };
 
   return (

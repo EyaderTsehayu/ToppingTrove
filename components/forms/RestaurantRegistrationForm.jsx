@@ -7,6 +7,8 @@ import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { LuUpload } from "react-icons/lu";
+import { toast } from "react-toastify";
 
 // Zod schema for validation
 const restaurantRegistrationSchema = z
@@ -42,6 +44,7 @@ const RestaurantRegistrationForm = () => {
   const router = useRouter();
   const [logo, setLogo] = useState();
   const [restaurantId, setRestaurantId] = useState(null);
+  const [adminName, setAdminName] = useState(null);
   const {
     register,
     handleSubmit,
@@ -85,10 +88,13 @@ const RestaurantRegistrationForm = () => {
       });
 
       if (response.ok) {
-        const { restaurantId } = await response.json();
+        const { restaurantId, adminName } = await response.json();
         setRestaurantId(restaurantId); // Save the restaurant ID for the next form
+        setAdminName(adminName);
+        toast.success("Registration Successful");
       } else {
         console.log("Restaurant registration failed");
+        toast.success("Restaurant registration failed");
       }
     } catch (error) {
       console.error("some wrong went");
@@ -109,16 +115,19 @@ const RestaurantRegistrationForm = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        name: adminName,
         email: data.email,
         password: data.password,
         location: data.location,
         phoneNumber: data.phoneNumber,
         restaurantId: restaurantId,
+        roles: 10,
       }),
     });
 
     if (response.ok) {
       router.push("/sign-in");
+      toast.success("Admin Registered Successfully");
     } else {
       console.log("Registration Failed");
     }
@@ -190,16 +199,52 @@ const RestaurantRegistrationForm = () => {
 
           {/* Upload Logo */}
           <div>
-            <label>Upload Logo</label>
             <input
+              id="logo-upload"
               type="file"
               accept="image/*"
               onChange={(e) => setLogo(e.target.files[0])}
+              className="hidden"
             />
+            <label
+              htmlFor="logo-upload"
+              className="flex gap-2 items-center justify-center  px-10 py-3 rounded-md border-2 border-dotted border-gray-600 cursor-pointer hover:border-orange-500 transition duration-200 ease-in-out"
+            >
+              <LuUpload className="flex text-lg text-primary mb-2" />
+              <span className="text-primary">Upload Logo</span>
+              {logo && (
+                <p className="text-sm text-gray-500">
+                  Selected logo: {logo.name}
+                </p>
+              )}
+            </label>
             {errors.logo && (
               <p className="text-red-500 text-sm">{errors.logo.message}</p>
             )}
           </div>
+          {/* <div className="mb-4">
+            <input
+              id="pizza-photo-upload"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files[0])}
+              className="hidden"
+            />
+
+            <label
+              htmlFor="pizza-photo-upload"
+              className="flex gap-2 items-center justify-center  px-10 py-3 rounded-md border-2 border-dotted border-gray-600 cursor-pointer hover:border-orange-500 transition duration-200 ease-in-out"
+            >
+              <LuUpload className="flex text-lg text-primary mb-2" />
+              <span className="text-primary">Upload Pizza Photo</span>
+            </label>
+
+            {image && (
+              <p className="mt-2 text-sm text-gray-500">
+                Selected file: {image.name}
+              </p>
+            )}
+          </div> */}
 
           {/* Accept Terms and Conditions */}
           <FormControlLabel
