@@ -42,15 +42,15 @@ const OrdersPage = () => {
   const router = useRouter();
 
   // Check for permissions on page load
-  useEffect(() => {
-    if (
-      !ability.can("manage", "all") &&
-      !ability.can("read", "Order") &&
-      !ability.can("update", "Order")
-    ) {
-      router.replace("/not-permitted");
-    }
-  }, [ability, router]);
+  // useEffect(() => {
+  //   if (
+  //     !ability.can("manage", "all") &&
+  //     !ability.can("read", "Order") &&
+  //     !ability.can("update", "Order")
+  //   ) {
+  //     router.replace("/not-permitted");
+  //   }
+  // }, [ability, router]);
 
   // Fetch data from the backend
   useEffect(() => {
@@ -157,6 +157,11 @@ const OrdersPage = () => {
             </IconButton>
           </Box>
         ),
+      },
+      {
+        accessorKey: "phoneNumber",
+        header: "Phone Number",
+        size: 100,
       },
       {
         accessorKey: "quantity",

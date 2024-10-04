@@ -8,6 +8,8 @@ import {
   Box,
   Typography,
   IconButton,
+  Dialog,
+  DialogContent,
 } from "@mui/material";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -18,6 +20,8 @@ import { LuUpload } from "react-icons/lu";
 import { useSession } from "next-auth/react";
 import { defineAbilitiesFor } from "@/lib/ability";
 import { useRouter } from "next/navigation";
+import succes from "/public/images/succes.png";
+import Image from "next/image";
 
 const schema = z.object({
   pizzaName: z.string().min(1, "Pizza name is required"),
@@ -39,6 +43,8 @@ const Page = () => {
   // console.log("Session inside add menu", restaurantId);
   const [availableToppings, setAvailableToppings] = useState(initialToppings);
   const [image, setImage] = useState();
+  const [openSuccesDialog, setOpenSuccesDialog] = useState(false);
+
   const ability = defineAbilitiesFor(session?.user);
   const router = useRouter();
 
@@ -145,6 +151,7 @@ const Page = () => {
 
       if (response.ok) {
         console.log("Menu added successfully");
+        setOpenSuccesDialog(true);
       } else {
         console.log("Restaurant registration failed");
       }
@@ -172,6 +179,19 @@ const Page = () => {
 
   return (
     <div className="flex flex-col items-center justify-start mx-4 my-6 h-screen bg-white">
+      <Dialog
+        open={openSuccesDialog}
+        onClose={() => setOpenSuccesDialog(false)}
+      >
+        <DialogContent className="w-[600px] py-10 px-8 rounded-3xl">
+          <div className="flex flex-col gap-4 justify-center items-center">
+            <Image src={succes} alt="Succes" width={300} h3ight={300} />
+            <h1 className="text-3xl font-bold text-successtext text-center">
+              Your have uploaded pizza successfully.
+            </h1>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
