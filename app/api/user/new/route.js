@@ -14,7 +14,12 @@ export async function POST(req) {
       restaurantId,
       roles,
     } = body;
-    const resId = parseInt(restaurantId);
+
+    var resId;
+    if (restaurantId != undefined) {
+      resId = parseInt(restaurantId);
+    }
+
     const existingUserByEmail = await db.user.findUnique({
       where: {
         email: email,
