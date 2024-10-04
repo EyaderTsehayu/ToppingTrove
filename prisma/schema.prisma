@@ -51,7 +51,7 @@ model Restaurant {
   email       String?
   phoneNumber String
   location    String
-  logo        Bytes    // Store as a URL or file path
+  logo        String?    
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
