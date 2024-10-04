@@ -5,8 +5,19 @@ import TopRestaurant from "@/components/Feature/TopRestaurant";
 import Footer from "@/components/footer/Footer";
 import Hero from "@/components/hero/Hero";
 import Navbar from "@/components/navbar/Navbar";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    const resId = session?.user?.restaurantId;
+    // console.log("REstaurant IDDddddd", resId);
+    if (resId != null) {
+      redirect("/dashboard/orders");
+    }
+  }
   return (
     <div>
       <Navbar />
@@ -18,7 +29,7 @@ export default function Home() {
       <TopRestaurant />
       <PopularPizza />
       <Fasting />
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }
