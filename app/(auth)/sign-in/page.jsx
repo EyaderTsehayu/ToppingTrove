@@ -1,7 +1,7 @@
 import Image from "next/image";
 import logo from "/public/images/logo.png";
 import SideUi from "@/components/ui/SideUi";
-import SignInForm from "@/components/forms/SigninForm";
+import SignInForm from "@/components/forms/SignInForm";
 
 const page = () => {
   return (

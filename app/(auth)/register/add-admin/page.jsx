@@ -1,7 +1,6 @@
 import Image from "next/image";
 import logo from "/public/images/logo.png";
 import SideUi from "@/components/ui/SideUi";
-import SignInForm from "@/components/forms/SigninForm";
 import AddAdminForm from "@/components/forms/AddAdminForm";
 
 const page = () => {
