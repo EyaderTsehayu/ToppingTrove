@@ -2,19 +2,15 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(req) {
+  const { searchParams } = new URL(req.url); // Use URL to extract search params
+  const userId = parseInt(searchParams.get("userId"));
+  if (!userId) {
+    return NextResponse.json(
+      { message: "userId is required" },
+      { status: 400 }
+    );
+  }
   try {
-    const { searchParams } = new URL(req.url);
-
-    var userId = searchParams.get("userId");
-    userId = parseInt(userId);
-
-    if (!userId) {
-      return NextResponse.json(
-        { message: "userId is required" },
-        { status: 400 }
-      );
-    }
-
     // Fetch the user by userId
     const orders = await db.order.findMany({
       where: { userId: userId },

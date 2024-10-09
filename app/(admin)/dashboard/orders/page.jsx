@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -95,8 +95,7 @@ const OrdersPage = () => {
     setOpenDialog(false);
     setSelectedOrder(null);
   };
-
-  const handleStatusChange = async (newStatus, orderId) => {
+  const handleStatusChange = useCallback(async (newStatus, orderId) => {
     try {
       const response = await fetch(`/api/order?id=${orderId}`, {
         method: "PUT",
@@ -119,7 +118,32 @@ const OrdersPage = () => {
     } catch (error) {
       console.error("Error updating status:", error);
     }
-  };
+  }, []); // Add dependencies if any
+
+  // const handleStatusChange = async (newStatus, orderId) => {
+  //   try {
+  //     const response = await fetch(`/api/order?id=${orderId}`, {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ status: newStatus }),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to update status");
+  //     }
+
+  //     // Update the orderLists state with the new status
+  //     setOrderLists((prevOrders) =>
+  //       prevOrders.map((order) =>
+  //         order.id === orderId ? { ...order, status: newStatus } : order
+  //       )
+  //     );
+  //   } catch (error) {
+  //     console.error("Error updating status:", error);
+  //   }
+  // };
 
   // Define columns
   const columns = useMemo(
@@ -303,7 +327,7 @@ const OrdersPage = () => {
         },
       },
     ],
-    [handleStatusChange]
+    [ability, handleStatusChange]
   );
 
   // Custom Radio Button component inside MenuItem

@@ -1,7 +1,7 @@
 // pages/order/[id]/index.js
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import {
   Checkbox,
   Dialog,
@@ -242,4 +242,10 @@ const OrderPage = () => {
   );
 };
 
-export default OrderPage;
+const OrderPageWrapper = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <OrderPage />
+  </Suspense>
+);
+
+export default OrderPageWrapper;

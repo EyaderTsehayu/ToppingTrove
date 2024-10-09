@@ -263,7 +263,7 @@ const Page = () => {
         ),
       },
     ],
-    [roleLists] // Ensure columns update when roleLists changes
+    [] // Ensure columns update when roleLists changes
   );
 
   // Initialize Material React Table

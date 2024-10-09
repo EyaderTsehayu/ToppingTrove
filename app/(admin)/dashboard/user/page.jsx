@@ -225,7 +225,7 @@ const Page = () => {
         ),
       },
     ],
-    [userLists] // Ensure columns update when userLists changes
+    [] // Ensure columns update when userLists changes
   );
 
   // Initialize Material React Table

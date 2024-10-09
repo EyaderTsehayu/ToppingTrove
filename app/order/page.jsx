@@ -70,7 +70,7 @@ const Page = () => {
       {pizzaData.length === 0 && (
         <div className="bg-mainbg h-screen  flex justify-center items-center md:px-28 px-4">
           <h2 className="mb-4 md:text-4xl text-2xl font-semibold text-center text-primary">
-            You don't have any order history!
+            You do not have any order history!
           </h2>
         </div>
       )}
