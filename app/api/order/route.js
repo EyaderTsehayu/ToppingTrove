@@ -6,17 +6,42 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
   const session = await getServerSession(authOptions);
   const loginResId = session?.user.restaurantId;
-  //console.log("loginResId from server", loginResId);
+
+  // Extract search parameter from the query
+  const search = req.nextUrl.searchParams.get("search") || "";
+
+  // Build search condition if search parameter exists
+  const searchCondition = search
+    ? {
+        OR: [
+          {
+            menu: {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          },
+          // {
+          //   phoneNumber: {
+          //     contains: search,
+          //     mode: "insensitive",
+          //   },
+          // },
+        ],
+      }
+    : {};
+
   try {
-    // Fetch all menu items with restaurant data
+    // Fetch orders with search filtering
     const orders = await db.order.findMany({
       where: {
-        restaurantId: loginResId, // Add the where condition
+        restaurantId: loginResId,
+        ...searchCondition, // Add the search condition if it exists
       },
       include: {
         menu: {
           select: {
-            // id: true,
             name: true, // Fetch only the restaurant name
             photo: true,
           },
@@ -24,7 +49,7 @@ export async function GET(req) {
       },
     });
 
-    // Convert images from bytes to base64
+    // Convert images from bytes to base64 if needed and format response
     const formattedOrders = orders.map((order) => ({
       id: order.id,
       name: order.menu.name,
@@ -34,14 +59,13 @@ export async function GET(req) {
       status: order.status,
       createdAt: order.createdAt,
       phoneNumber: order.phoneNumber,
-      //  logo: `/${menu.restaurant.logo}`,
     }));
 
     return NextResponse.json(formattedOrders, { status: 200 });
   } catch (error) {
-    console.error("Error fetching menus:", error);
+    console.error("Error fetching orders:", error);
     return NextResponse.json(
-      { message: "Error fetching menus" },
+      { message: "Error fetching orders" },
       { status: 500 }
     );
   }
