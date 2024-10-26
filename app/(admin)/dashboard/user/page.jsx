@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
@@ -8,19 +9,9 @@ import {
   Box,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogTitle,
-  TextField,
   Switch,
   IconButton,
-  Checkbox,
-  FormControlLabel,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  FormHelperText,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -28,7 +19,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import CustomInput from "../../../../components/ui/CustomInput";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import succes from "/public/images/succes.png";
 import Image from "next/image";
@@ -51,20 +41,24 @@ const registrationSchema = z.object({
 
 const Page = () => {
   const [userLists, setUserLists] = useState([]);
-  const [roleLists, setRoleLists] = useState([]);
-  const [selectedRole, setSelectedRole] = useState("");
-
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openSuccesDialog, setOpenSuccesDialog] = useState(false);
 
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const loginResId = session?.user.restaurantId;
-
   const ability = defineAbilitiesFor(session?.user);
-
   const router = useRouter();
 
-  // Check for permissions on page load
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registrationSchema),
+  });
+
   useEffect(() => {
     if (
       !ability.can("manage", "all") &&
@@ -75,71 +69,29 @@ const Page = () => {
     }
   }, [ability, router]);
 
-  // const router = useRouter();
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(registrationSchema),
-  });
-
-  // Fetch users from the backend
-
-  const fetchUsers = async () => {
+  const fetchUsers = async (query = "") => {
     try {
-      const response = await fetch("/api/user/restaurant-users");
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
-      }
-
+      const response = await fetch(
+        `/api/user/restaurant-users?search=${query}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch users");
       const data = await response.json();
-      const formattedData = data.map((user) => ({
-        ...user,
-      }));
-      console.log("formattedData", formattedData);
-      setUserLists(formattedData);
+      setUserLists(data);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
 
-  const fetchRoles = async () => {
-    try {
-      const response = await fetch("/api/role");
-      if (!response.ok) {
-        throw new Error("Failed to fetch roles");
-      }
-
-      const data = await response.json();
-      const formattedData = data.map((role) => ({
-        ...role,
-      }));
-      setRoleLists(formattedData);
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
-    fetchRoles();
-  }, []);
+    fetchUsers(searchQuery);
+  }, [searchQuery]); // Fetch users on search query change
 
   const onSubmit = async (data) => {
-    // console.log("Data to be sent", data);
     const response = await fetch("/api/user", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        location: data.location,
-        phoneNumber: data.phoneNumber,
+        ...data,
         restaurantId: loginResId,
         roles: data.role,
       }),
@@ -152,18 +104,12 @@ const Page = () => {
     } else {
       console.log("Registration Failed", response);
     }
-
-    // Handle form submission logic here
   };
 
-  // Handle Delete Role
   const handleDeleteRole = async (roleId) => {
     if (!confirm("Are you sure you want to delete this role?")) return;
 
-    const response = await fetch(`/api/role/${roleId}`, {
-      method: "DELETE",
-    });
-
+    const response = await fetch(`/api/role/${roleId}`, { method: "DELETE" });
     if (response.ok) {
       setUserLists((prev) => prev.filter((role) => role.id !== roleId));
     } else {
@@ -171,49 +117,20 @@ const Page = () => {
     }
   };
 
-  // Handle Permission Change for Add
-  const handleAddPermissionChange = (permission) => {
-    setAddSelectedPermissions((prev) =>
-      prev.includes(permission)
-        ? prev.filter((p) => p !== permission)
-        : [...prev, permission]
-    );
-  };
-
-  // Define Table Columns
   const columns = useMemo(
     () => [
-      {
-        accessorKey: "name",
-        header: "Name",
-        size: 150,
-      },
-      {
-        accessorKey: "phoneNumber",
-        header: "Phone Number",
-        size: 150,
-      },
-      {
-        accessorKey: "email",
-        header: "Email",
-        size: 150,
-      },
-
+      { accessorKey: "name", header: "Name", size: 150 },
+      { accessorKey: "phoneNumber", header: "Phone Number", size: 150 },
+      { accessorKey: "email", header: "Email", size: 150 },
       {
         accessorKey: "actions",
         header: "Actions",
         size: 150,
         Cell: ({ row }) => (
           <Box display="flex" alignItems="center">
-            {" "}
             <div className="flex justify-center items-center bg-[#ffecda] py-1 px-2 rounded-3xl">
               <p className="text-[#008000] text-base">Active</p>
-              <Switch
-                // checked={row.original.active}
-                // onChange={() => handleToggleActive(row.original)}
-                size="small"
-                color="#008000"
-              />
+              <Switch size="small" color="#008000" />
             </div>
             <IconButton
               color="#000000"
@@ -225,10 +142,9 @@ const Page = () => {
         ),
       },
     ],
-    [] // Ensure columns update when userLists changes
+    []
   );
 
-  // Initialize Material React Table
   const table = useMaterialReactTable({
     columns,
     data: userLists,
@@ -240,9 +156,11 @@ const Page = () => {
     enableBottomToolbar: false,
     enableColumnFilterModes: true,
     manualFiltering: true,
+    globalFilterFn: "contains",
+    onGlobalFilterChange: (filter) => setSearchQuery(filter || ""), // Set search query on filter change
     muiTableContainerProps: { sx: { border: 1, borderColor: "#e0e0e0" } },
     muiTablePaperProps: { sx: { px: 5, pt: 2, pb: 10 } },
-    renderTopToolbarCustomActions: ({ table }) => (
+    renderTopToolbarCustomActions: () => (
       <Button
         className="text-base font-normal capitalize py-1.5 px-3 text-white bg-primary"
         onClick={() => setOpenAddDialog(true)}
@@ -252,18 +170,11 @@ const Page = () => {
         Add User
       </Button>
     ),
-    muiTableHeadCellProps: () => ({
-      sx: {
-        backgroundColor: "#f6f6f6",
-      },
-    }),
   });
 
   return (
     <div className="p-8">
       <MaterialReactTable table={table} />
-
-      {/* Dialog for Adding Role */}
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
         <DialogContent className="w-[500px] py-10 px-8 rounded-lg">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -358,6 +269,7 @@ const Page = () => {
           </div>
         </DialogContent>
       </Dialog>
+      {/* Dialogs for Add Role and Success */}
     </div>
   );
 };

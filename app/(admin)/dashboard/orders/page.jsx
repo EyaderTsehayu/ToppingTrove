@@ -22,7 +22,10 @@ import {
   RadioGroup,
   Radio,
   Typography,
+  TextField,
+  // debounce,
 } from "@mui/material";
+import debounce from "lodash.debounce";
 import { Visibility } from "@mui/icons-material";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { FaCheck } from "react-icons/fa";
@@ -32,6 +35,7 @@ import { useSession } from "next-auth/react";
 
 const OrdersPage = () => {
   const [orderLists, setOrderLists] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -53,17 +57,83 @@ const OrdersPage = () => {
   // }, [ability, router]);
 
   // Fetch data from the backend
-  useEffect(() => {
-    const fetchOrders = async () => {
+  // useEffect(() => {
+  //   const fetchOrders = async () => {
+  //     try {
+  //       const response = await fetch("/api/order");
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch order data");
+  //       }
+
+  //       const data = await response.json();
+  //       const formattedData = data.map((order) => ({
+  //         id: order.id, // Assuming each order has a unique 'id'
+  //         name: order.name,
+  //         toppings: order.toppings.join(", "),
+  //         quantity: order.quantity,
+  //         photo: order.photo,
+  //         phoneNumber: order.phoneNumber,
+  //         createdAt: new Date(order.createdAt).toLocaleString(),
+  //         status: order.status,
+  //       }));
+  //       console.log("Formatted data:", formattedData);
+  //       setOrderLists(formattedData);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error fetching order data:", error);
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchOrders();
+  // }, []);
+
+  // const fetchOrders = async (searchValue = "") => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await fetch(
+  //       `/api/order?search=${encodeURIComponent(searchValue)}`
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch order data");
+  //     }
+
+  //     const data = await response.json();
+  //     const formattedData = data.map((order) => ({
+  //       id: order.id,
+  //       name: order.name,
+  //       toppings: order.toppings.join(", "),
+  //       quantity: order.quantity,
+  //       photo: order.photo,
+  //       phoneNumber: order.phoneNumber,
+  //       createdAt: new Date(order.createdAt).toLocaleString(),
+  //       status: order.status,
+  //     }));
+
+  //     console.log("Formatted data:", formattedData);
+  //     setOrderLists(formattedData);
+  //   } catch (error) {
+  //     console.error("Error fetching order data:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const fetchOrders = useCallback(
+    debounce(async (searchValue = "") => {
       try {
-        const response = await fetch("/api/order");
+        setLoading(true);
+        const response = await fetch(
+          `/api/order?search=${encodeURIComponent(searchValue)}`
+        );
+
         if (!response.ok) {
           throw new Error("Failed to fetch order data");
         }
 
         const data = await response.json();
         const formattedData = data.map((order) => ({
-          id: order.id, // Assuming each order has a unique 'id'
+          id: order.id,
           name: order.name,
           toppings: order.toppings.join(", "),
           quantity: order.quantity,
@@ -72,15 +142,20 @@ const OrdersPage = () => {
           createdAt: new Date(order.createdAt).toLocaleString(),
           status: order.status,
         }));
+
         console.log("Formatted data:", formattedData);
         setOrderLists(formattedData);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching order data:", error);
+      } finally {
         setLoading(false);
       }
-    };
+    }, 300),
+    []
+  );
 
+  // Fetch initial data
+  useEffect(() => {
     fetchOrders();
   }, []);
 
@@ -330,6 +405,9 @@ const OrdersPage = () => {
     [ability, handleStatusChange]
   );
 
+  const handleSearchChange = (searchValue) => {
+    fetchOrders(searchValue);
+  };
   // Custom Radio Button component inside MenuItem
   const getToppingColor = (topping) => {
     switch (topping.toLowerCase()) {
@@ -345,9 +423,37 @@ const OrdersPage = () => {
     }
   };
 
+  // const table = useMaterialReactTable({
+  //   columns,
+  //   data: orderLists, // Use fetched data
+  //   enableColumnActions: false,
+  //   enableSorting: false,
+  //   enablePagination: false,
+  //   enableTableFooter: false,
+  //   enableStickyFooter: false,
+  //   enableBottomToolbar: false,
+  //   enableColumnFilterModes: true,
+  //   manualFiltering: true,
+  //   muiTableContainerProps: { sx: { border: 1, borderColor: "#e0e0e0" } },
+  //   muiTablePaperProps: { sx: { px: 5, pt: 2, pb: 10 } },
+  //   renderTopToolbarCustomActions: ({ table }) => (
+  //     <Box sx={{ display: "flex", gap: "1rem", p: "4px" }}>
+  //       <h1 className="text-lg font-normal text-gray-500">Orders</h1>
+  //     </Box>
+  //   ),
+  //   muiTableHeadCellProps: (table) => ({
+  //     sx: {
+  //       backgroundColor: "#f6f6f6",
+  //     },
+  //   }),
+  // });
   const table = useMaterialReactTable({
     columns,
-    data: orderLists, // Use fetched data
+    data: orderLists,
+    state: {
+      globalFilter: "", // Tracks the search text
+    },
+    onGlobalFilterChange: handleSearchChange,
     enableColumnActions: false,
     enableSorting: false,
     enablePagination: false,
@@ -358,15 +464,13 @@ const OrdersPage = () => {
     manualFiltering: true,
     muiTableContainerProps: { sx: { border: 1, borderColor: "#e0e0e0" } },
     muiTablePaperProps: { sx: { px: 5, pt: 2, pb: 10 } },
-    renderTopToolbarCustomActions: ({ table }) => (
+    renderTopToolbarCustomActions: () => (
       <Box sx={{ display: "flex", gap: "1rem", p: "4px" }}>
         <h1 className="text-lg font-normal text-gray-500">Orders</h1>
       </Box>
     ),
     muiTableHeadCellProps: (table) => ({
-      sx: {
-        backgroundColor: "#f6f6f6",
-      },
+      sx: { backgroundColor: "#f6f6f6" },
     }),
   });
 
