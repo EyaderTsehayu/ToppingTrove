@@ -44,6 +44,7 @@ export async function GET(req) {
           select: {
             name: true, // Fetch only the restaurant name
             photo: true,
+            restaurantId: true,
           },
         },
       },
@@ -59,6 +60,7 @@ export async function GET(req) {
       status: order.status,
       createdAt: order.createdAt,
       phoneNumber: order.phoneNumber,
+      restaurantId: order.menu.restaurantId,
     }));
 
     return NextResponse.json(formattedOrders, { status: 200 });
