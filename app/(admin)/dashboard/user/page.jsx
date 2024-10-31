@@ -12,6 +12,10 @@ import {
   DialogContent,
   Switch,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -41,6 +45,8 @@ const registrationSchema = z.object({
 
 const Page = () => {
   const [userLists, setUserLists] = useState([]);
+  const [roleLists, setRoleLists] = useState([]);
+
   const [searchQuery, setSearchQuery] = useState(""); // New state for search
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openSuccesDialog, setOpenSuccesDialog] = useState(false);
@@ -82,8 +88,27 @@ const Page = () => {
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch("/api/role");
+      if (!response.ok) {
+        throw new Error("Failed to fetch roles");
+      }
+
+      const data = await response.json();
+      const formattedData = data.map((role) => ({
+        ...role,
+        active: role.active || true, // Assuming roles have an 'active' field
+      }));
+      setRoleLists(formattedData);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers(searchQuery);
+    fetchRoles();
   }, [searchQuery]); // Fetch users on search query change
 
   const onSubmit = async (data) => {
@@ -106,16 +131,16 @@ const Page = () => {
     }
   };
 
-  const handleDeleteRole = async (roleId) => {
-    if (!confirm("Are you sure you want to delete this role?")) return;
+  // const handleDeleteRole = async (roleId) => {
+  //   if (!confirm("Are you sure you want to delete this role?")) return;
 
-    const response = await fetch(`/api/role/${roleId}`, { method: "DELETE" });
-    if (response.ok) {
-      setUserLists((prev) => prev.filter((role) => role.id !== roleId));
-    } else {
-      console.error("Error deleting role:", response);
-    }
-  };
+  //   const response = await fetch(`/api/role/${roleId}`, { method: "DELETE" });
+  //   if (response.ok) {
+  //     setUserLists((prev) => prev.filter((role) => role.id !== roleId));
+  //   } else {
+  //     console.error("Error deleting role:", response);
+  //   }
+  // };
 
   const columns = useMemo(
     () => [
@@ -134,7 +159,7 @@ const Page = () => {
             </div>
             <IconButton
               color="#000000"
-              onClick={() => handleDeleteRole(row.original.id)}
+              //  onClick={() => handleDeleteRole(row.original.id)}
             >
               <DeleteIcon />
             </IconButton>

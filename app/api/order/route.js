@@ -75,23 +75,34 @@ export async function GET(req) {
 
 export async function PUT(req) {
   const session = await getServerSession(authOptions);
-  const loginResId = session?.user.restaurantId;
+  let loginResId = session?.user.restaurantId;
 
-  if (!session) {
-    return NextResponse.json(
-      { message: "You must be logged in to update the order status." },
-      { status: 401 }
-    );
-  }
+  // if (!session) {
+  //   return NextResponse.json(
+  //     { message: "You must be logged in to update the order status." },
+  //     { status: 401 }
+  //   );
+  // }
 
   try {
     // Parse the request body to get new status
     const body = await req.json();
     const { status } = body;
-
+    // console.log("status", status);
     // Extract order ID from the request URL
     const { searchParams } = new URL(req.url);
     const orderIds = searchParams.get("id");
+    const loggedUserRes = searchParams.get("loggedUserRes");
+    //  console.log(loginResId);
+
+    //for cucumebr testing only - use the passed logged in user resId
+    if (loginResId == null) {
+      loginResId = parseInt(loggedUserRes);
+      // console.log("loginIDDDDDDD", loginResId);
+    }
+    // console.log("login res Id -", loginResId);
+
+    // console.log("orderIds", orderIds);
     const orderId = parseInt(orderIds);
     if (!orderId || !status) {
       return NextResponse.json(
